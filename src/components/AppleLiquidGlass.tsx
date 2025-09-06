@@ -246,7 +246,7 @@ export default function AppleLiquidGlass({
   }, [isMobile]);
 
   // Fallback for non-WebGL devices
-  if (!webglSupported) {
+  if (webglSupported || true) {
     return (
       <div ref={containerRef} className={`relative h-full w-full ${className}`}>
         <div

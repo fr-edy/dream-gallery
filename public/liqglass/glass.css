@@ -1,0 +1,266 @@
+/* Glass Container Styles */
+.glass-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 
+    0 8px 32px rgba(31, 38, 135, 0.37),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.glass-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass-container-circle {
+  aspect-ratio: 1 / 1; /* Force perfect square ratio */
+  flex-shrink: 0;
+  flex-grow: 0;
+  border-radius: 50%;
+}
+
+.glass-container-pill {
+  flex-shrink: 0;
+  flex-grow: 0;
+  border-radius: 50px;
+}
+
+/* Glass Button Styles */
+.glass-button {
+  position: relative;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 4px 16px rgba(31, 38, 135, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  min-height: 44px;
+  min-width: 88px;
+  pointer-events: auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box; /* Ensure padding doesn't affect size calculations */
+}
+
+.glass-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(31, 38, 135, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.glass-button:hover::before {
+  opacity: 1;
+}
+
+.glass-button:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 8px rgba(31, 38, 135, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+
+.glass-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+.glass-button:disabled:hover {
+  transform: none;
+  box-shadow: 
+    0 4px 16px rgba(31, 38, 135, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.glass-button-circle {
+  aspect-ratio: 1 / 1; /* Force perfect square ratio */
+  flex-shrink: 0;
+  flex-grow: 0;
+  border-radius: 50%;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Button Content Styles */
+.glass-button-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.glass-button-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  pointer-events: none;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: system-ui, -apple-system, sans-serif;
+  white-space: nowrap;
+  font-size: 14px;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  user-select: none;
+}
+
+/* Shape Variants */
+.glass-button.shape-circle {
+  border-radius: 50%;
+  aspect-ratio: 1;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.glass-button.shape-pill {
+  border-radius: 22px;
+}
+
+.glass-container.shape-circle {
+  border-radius: 50%;
+  aspect-ratio: 1;
+}
+
+.glass-container.shape-pill {
+  border-radius: 50px;
+}
+
+/* Size Variants */
+.glass-button.size-small {
+  min-height: 32px;
+  min-width: 64px;
+  font-size: 12px;
+}
+
+.glass-button.size-small .glass-button-content {
+  padding: 8px 16px;
+}
+
+.glass-button.size-large {
+  min-height: 56px;
+  min-width: 112px;
+  font-size: 16px;
+}
+
+.glass-button.size-large .glass-button-content {
+  padding: 16px 32px;
+}
+
+/* Focus Styles */
+.glass-button:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+/* Animation for ripple effect */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.glass-button-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+  animation: ripple 0.6s linear;
+  z-index: 1;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .glass-container {
+    background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .glass-button {
+    background: rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .glass-button {
+    transition: none;
+  }
+  
+  .glass-button:hover {
+    transform: none;
+  }
+  
+  .glass-button:active {
+    transform: none;
+  }
+  
+  .glass-button-ripple {
+    animation: none;
+  }
+}
