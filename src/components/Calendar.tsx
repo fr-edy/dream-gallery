@@ -168,21 +168,9 @@ const Calendar: React.FC<CalendarProps> = ({
   };
 
 
-  const handleDateClick = (day: CalendarDay) => {
-    if (day.isCurrentMonth && onDateSelect) {
-      const selectedDate = new Date(currentYear, currentMonth, day.date);
-      onDateSelect(selectedDate);
-    }
-  };
 
   const handleDateHover = (day: CalendarDay, targetEl?: HTMLElement) => {
-    console.log('handleDateHover called:', { 
-      date: day.date, 
-      isCurrentMonth: day.isCurrentMonth, 
-      hasImage: day.hasImage 
-    });
     if (day.isCurrentMonth && day.hasImage) {
-      console.log('Setting dream card to show');
       setSelectedDay(day);
       setShowDreamCard(true);
       if (targetEl) {
@@ -198,7 +186,6 @@ const Calendar: React.FC<CalendarProps> = ({
   };
 
   const handleDateLeave = () => {
-    console.log('handleDateLeave called');
     if (!isOpen) {
       setShowDreamCard(false);
       setSelectedDay(null);
@@ -243,8 +230,6 @@ const Calendar: React.FC<CalendarProps> = ({
 
   const calendarDays = generateCalendarDays();
 
-  // Debug logging
-  console.log('Current state:', { showDreamCard, selectedDay: selectedDay?.date });
 
   return (
     <div
@@ -360,11 +345,9 @@ const Calendar: React.FC<CalendarProps> = ({
             }}
             onClick={(event) => handleOpen(day, event.currentTarget as HTMLElement)}
             onHoverStart={(event) => {
-              console.log('Hovering over day:', day.date, 'hasImage:', day.hasImage);
               handleDateHover(day, (event.currentTarget as HTMLElement) ?? undefined);
             }}
             onHoverEnd={() => {
-              console.log('Leaving day:', day.date);
               handleDateLeave();
             }}
           >
