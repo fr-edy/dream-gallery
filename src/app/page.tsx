@@ -24,6 +24,9 @@ export default function Home() {
 
             <div className="mt-12 flex flex-col items-center gap-6 sm:flex-row">
               <GlassButton
+                onClick={() => {
+                  window.location.href = '/calendar';
+                }}
                 className="text-md font-serif font-light text-white/90 transition-colors hover:text-white w-40 h-10"
               >
                 <div className="flex items-center gap-2">
