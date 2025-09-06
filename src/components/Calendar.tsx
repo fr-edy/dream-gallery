@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import React, { useState } from "react";
 import { ChevronUp, ChevronDown, User } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import DreamCard from "./DreamCard";
@@ -38,8 +37,6 @@ const Calendar: React.FC<CalendarProps> = ({
   } | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [openTarget, setOpenTarget] = useState<{ left: number; top: number } | null>(null);
-  const [hoverEl, setHoverEl] = useState<HTMLElement | null>(null);
-  const suppressLeaveRef = useRef(false);
 
   const monthNames = [
     "January",
@@ -196,27 +193,21 @@ const Calendar: React.FC<CalendarProps> = ({
           width: rect.width,
           height: rect.height,
         });
-        setHoverEl(targetEl);
       }
     }
   };
 
   const handleDateLeave = () => {
     console.log('handleDateLeave called');
-    if (suppressLeaveRef.current) {
-      return;
-    }
     if (!isOpen) {
       setShowDreamCard(false);
       setSelectedDay(null);
       setHoverRect(null);
-      setHoverEl(null);
     }
   };
 
   const handleOpen = (day: CalendarDay, targetEl?: HTMLElement) => {
     if (!day.isCurrentMonth) return;
-    suppressLeaveRef.current = true;
     const rect = targetEl?.getBoundingClientRect();
     if (rect) {
       setHoverRect({
@@ -225,7 +216,6 @@ const Calendar: React.FC<CalendarProps> = ({
         width: rect.width,
         height: rect.height,
       });
-      setHoverEl(targetEl || null);
     }
     setSelectedDay(day);
     setShowDreamCard(true);
@@ -241,9 +231,6 @@ const Calendar: React.FC<CalendarProps> = ({
       const selectedDate = new Date(currentYear, currentMonth, day.date);
       onDateSelect(selectedDate);
     }
-    window.setTimeout(() => {
-      suppressLeaveRef.current = false;
-    }, 200);
   };
 
   const handleClose = () => {
@@ -252,31 +239,7 @@ const Calendar: React.FC<CalendarProps> = ({
     setShowDreamCard(false);
     setSelectedDay(null);
     setHoverRect(null);
-    setHoverEl(null);
   };
-
-  // Keep hoverRect in sync on scroll/resize while active
-  useEffect(() => {
-    if (!(showDreamCard || isOpen)) return;
-    const update = () => {
-      if (hoverEl) {
-        const rect = hoverEl.getBoundingClientRect();
-        setHoverRect({
-          left: rect.left,
-          bottom: rect.bottom,
-          width: rect.width,
-          height: rect.height,
-        });
-      }
-    };
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => {
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [showDreamCard, isOpen, hoverEl]);
 
   const calendarDays = generateCalendarDays();
 
@@ -437,31 +400,27 @@ const Calendar: React.FC<CalendarProps> = ({
 
       {/* DreamCard Hover Expand Overlay from bottom-left */}
       <AnimatePresence mode="popLayout">
-        {!isOpen && showDreamCard && selectedDay && hoverRect && createPortal(
+        {!isOpen && showDreamCard && selectedDay && hoverRect && (
           <motion.div
             key={`dreamcard-expand-${selectedDay.date}`}
-            className="fixed z-50 left-0 top-0"
+            className="fixed z-50"
             style={{
+              left: hoverRect.left,
+              top: hoverRect.bottom - 418,
               transformOrigin: "bottom left",
             }}
             initial={{
               opacity: 1,
-              x: hoverRect.left,
-              y: hoverRect.bottom - 418,
               scaleX: hoverRect.width / 370,
               scaleY: hoverRect.height / 418,
             }}
             animate={{
               opacity: 1,
-              x: hoverRect.left,
-              y: hoverRect.bottom - 418,
               scaleX: 1,
               scaleY: 1,
             }}
             exit={{
               opacity: 1,
-              x: hoverRect.left,
-              y: hoverRect.bottom - 418,
               scaleX: hoverRect.width / 370,
               scaleY: hoverRect.height / 418,
             }}
@@ -479,14 +438,13 @@ const Calendar: React.FC<CalendarProps> = ({
                 backgroundImage: `url(${selectedDay.imageUrl || "/images/dream-background.png"})`,
               }}
             />
-          </motion.div>,
-          document.body
+          </motion.div>
         )}
       </AnimatePresence>
 
       {/* Open modal: animate from cell (bottom-left) into centered DreamCard */}
       <AnimatePresence>
-        {isOpen && selectedDay && hoverRect && openTarget && createPortal(
+        {isOpen && selectedDay && hoverRect && openTarget && (
           <>
             <motion.div
               className="fixed inset-0 z-40 bg-black/40"
@@ -498,26 +456,26 @@ const Calendar: React.FC<CalendarProps> = ({
             />
             <motion.div
               key={`dreamcard-open-${selectedDay.date}`}
-              className="fixed z-50 left-0 top-0"
+              className="fixed z-50"
               style={{
+                left: hoverRect.left,
+                top: hoverRect.bottom - 418,
                 transformOrigin: "bottom left",
               }}
               initial={{
                 opacity: 1,
-                x: hoverRect.left,
-                y: hoverRect.bottom - 418,
                 scaleX: hoverRect.width / 370,
                 scaleY: hoverRect.height / 418,
               }}
               animate={{
-                x: openTarget.left,
-                y: openTarget.top,
+                left: openTarget.left,
+                top: openTarget.top,
                 scaleX: 1,
                 scaleY: 1,
               }}
               exit={{
-                x: hoverRect.left,
-                y: hoverRect.bottom - 418,
+                left: hoverRect.left,
+                top: hoverRect.bottom - 418,
                 scaleX: hoverRect.width / 370,
                 scaleY: hoverRect.height / 418,
               }}
@@ -553,8 +511,7 @@ const Calendar: React.FC<CalendarProps> = ({
                 </motion.div>
               </div>
             </motion.div>
-          </>,
-          document.body
+          </>
         )}
       </AnimatePresence>
     </div>
