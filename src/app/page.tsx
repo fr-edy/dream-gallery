@@ -1,7 +1,6 @@
 "use client";
 
 import AppleLiquidGlass from "@/components/AppleLiquidGlass";
-import DreamCard from "@/components/DreamCard";
 import GlassButton from "@/components/GlassButton";
 import { ChevronRight } from "lucide-react";
 

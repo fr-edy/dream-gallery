@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronLeft, ChevronRight, User } from "lucide-react";
+import { ChevronUp, ChevronDown, User } from "lucide-react";
 
 interface CalendarProps {
   initialMonth?: number;
@@ -127,13 +127,32 @@ const Calendar: React.FC<CalendarProps> = ({
     <div
       className={`relative mx-auto max-w-4xl rounded-[40px] bg-white p-6 shadow-lg ${className}`}
     >
-      {/* Header with title and user avatar */}
+      {/* Header with title, navigation arrows, and user avatar */}
       <div className="mb-6 flex items-start justify-between">
-        <h1 className="mt-9 font-serif text-4xl text-black">
-          {monthNames[currentMonth]} {currentYear}
-        </h1>
-        <div className="rounded-full bg-gray-300 p-3">
-          <User className="h-12 w-10 text-gray-600" />
+        <div className="relative">
+          <h1 className="mt-9 font-serif text-4xl text-black">
+            {monthNames[currentMonth]} {currentYear}
+          </h1>
+          {/* Navigation arrows - positioned absolutely to stay in fixed position */}
+          <div className="absolute top-9 left-80 flex flex-row space-x-1">
+            <button
+              onClick={handlePrevMonth}
+              className="rounded p-1 transition-colors hover:bg-gray-100"
+              aria-label="Previous month"
+            >
+              <ChevronUp className="h-6 w-6 text-black" />
+            </button>
+            <button
+              onClick={handleNextMonth}
+              className="rounded p-1 transition-colors hover:bg-gray-100"
+              aria-label="Next month"
+            >
+              <ChevronDown className="h-6 w-6 text-black" />
+            </button>
+          </div>
+        </div>
+        <div className="rounded-full bg-gray-300 p-2">
+          <User className="h-6 w-6 text-gray-600" />
         </div>
       </div>
 
@@ -170,30 +189,13 @@ const Calendar: React.FC<CalendarProps> = ({
                 className={`font-serif text-3xl leading-tight ${
                   day.hasImage ? "text-white drop-shadow-lg" : "text-black"
                 } `}
+                style={{ marginTop: "20px" }}
               >
                 {day.date.toString().padStart(2, "0")}
               </span>
             )}
           </div>
         ))}
-      </div>
-
-      {/* Navigation arrows */}
-      <div className="absolute top-6 right-20 flex items-center space-x-2">
-        <button
-          onClick={handlePrevMonth}
-          className="rounded p-1 transition-colors hover:bg-gray-100"
-          aria-label="Previous month"
-        >
-          <ChevronLeft className="h-6 w-6 text-black" />
-        </button>
-        <button
-          onClick={handleNextMonth}
-          className="rounded p-1 transition-colors hover:bg-gray-100"
-          aria-label="Next month"
-        >
-          <ChevronRight className="h-6 w-6 text-black" />
-        </button>
       </div>
     </div>
   );
