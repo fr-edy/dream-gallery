@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChevronUp, ChevronDown, User } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import DreamCard from "./DreamCard";
@@ -29,6 +30,16 @@ const Calendar: React.FC<CalendarProps> = ({
   const [currentYear, setCurrentYear] = useState(initialYear);
   const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
   const [showDreamCard, setShowDreamCard] = useState(false);
+  const [hoverRect, setHoverRect] = useState<{
+    left: number;
+    bottom: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [openTarget, setOpenTarget] = useState<{ left: number; top: number } | null>(null);
+  const [hoverEl, setHoverEl] = useState<HTMLElement | null>(null);
+  const suppressLeaveRef = useRef(false);
 
   const monthNames = [
     "January",
@@ -167,7 +178,7 @@ const Calendar: React.FC<CalendarProps> = ({
     }
   };
 
-  const handleDateHover = (day: CalendarDay) => {
+  const handleDateHover = (day: CalendarDay, targetEl?: HTMLElement) => {
     console.log('handleDateHover called:', { 
       date: day.date, 
       isCurrentMonth: day.isCurrentMonth, 
@@ -177,14 +188,95 @@ const Calendar: React.FC<CalendarProps> = ({
       console.log('Setting dream card to show');
       setSelectedDay(day);
       setShowDreamCard(true);
+      if (targetEl) {
+        const rect = targetEl.getBoundingClientRect();
+        setHoverRect({
+          left: rect.left,
+          bottom: rect.bottom,
+          width: rect.width,
+          height: rect.height,
+        });
+        setHoverEl(targetEl);
+      }
     }
   };
 
   const handleDateLeave = () => {
     console.log('handleDateLeave called');
+    if (suppressLeaveRef.current) {
+      return;
+    }
+    if (!isOpen) {
+      setShowDreamCard(false);
+      setSelectedDay(null);
+      setHoverRect(null);
+      setHoverEl(null);
+    }
+  };
+
+  const handleOpen = (day: CalendarDay, targetEl?: HTMLElement) => {
+    if (!day.isCurrentMonth) return;
+    suppressLeaveRef.current = true;
+    const rect = targetEl?.getBoundingClientRect();
+    if (rect) {
+      setHoverRect({
+        left: rect.left,
+        bottom: rect.bottom,
+        width: rect.width,
+        height: rect.height,
+      });
+      setHoverEl(targetEl || null);
+    }
+    setSelectedDay(day);
+    setShowDreamCard(true);
+    const cardWidth = 370;
+    const cardHeight = 418;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const centerLeft = (viewportWidth - cardWidth) / 2;
+    const centerTop = (viewportHeight - cardHeight) / 2;
+    setOpenTarget({ left: centerLeft, top: centerTop });
+    setIsOpen(true);
+    if (onDateSelect) {
+      const selectedDate = new Date(currentYear, currentMonth, day.date);
+      onDateSelect(selectedDate);
+    }
+    window.setTimeout(() => {
+      suppressLeaveRef.current = false;
+    }, 200);
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setOpenTarget(null);
     setShowDreamCard(false);
     setSelectedDay(null);
+    setHoverRect(null);
+    setHoverEl(null);
   };
+
+  // Keep hoverRect in sync on scroll/resize while active
+  useEffect(() => {
+    if (!(showDreamCard || isOpen)) return;
+    const update = () => {
+      if (hoverEl) {
+        const rect = hoverEl.getBoundingClientRect();
+        setHoverRect({
+          left: rect.left,
+          bottom: rect.bottom,
+          width: rect.width,
+          height: rect.height,
+        });
+      }
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [showDreamCard, isOpen, hoverEl]);
 
   const calendarDays = generateCalendarDays();
 
@@ -303,10 +395,10 @@ const Calendar: React.FC<CalendarProps> = ({
               damping: 20,
               mass: 0.8
             }}
-            onClick={() => handleDateClick(day)}
-            onHoverStart={() => {
+            onClick={(event) => handleOpen(day, event.currentTarget as HTMLElement)}
+            onHoverStart={(event) => {
               console.log('Hovering over day:', day.date, 'hasImage:', day.hasImage);
-              handleDateHover(day);
+              handleDateHover(day, (event.currentTarget as HTMLElement) ?? undefined);
             }}
             onHoverEnd={() => {
               console.log('Leaving day:', day.date);
@@ -343,37 +435,126 @@ const Calendar: React.FC<CalendarProps> = ({
         ))}
       </div>
 
-      {/* DreamCard Overlay */}
-      <AnimatePresence mode="wait">
-        {showDreamCard && selectedDay && (
-          <motion.div 
-            key={`dreamcard-${selectedDay.date}`}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-20"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+      {/* DreamCard Hover Expand Overlay from bottom-left */}
+      <AnimatePresence mode="popLayout">
+        {!isOpen && showDreamCard && selectedDay && hoverRect && createPortal(
+          <motion.div
+            key={`dreamcard-expand-${selectedDay.date}`}
+            className="fixed z-50 left-0 top-0"
+            style={{
+              transformOrigin: "bottom left",
+            }}
+            initial={{
+              opacity: 1,
+              x: hoverRect.left,
+              y: hoverRect.bottom - 418,
+              scaleX: hoverRect.width / 370,
+              scaleY: hoverRect.height / 418,
+            }}
+            animate={{
+              opacity: 1,
+              x: hoverRect.left,
+              y: hoverRect.bottom - 418,
+              scaleX: 1,
+              scaleY: 1,
+            }}
+            exit={{
+              opacity: 1,
+              x: hoverRect.left,
+              y: hoverRect.bottom - 418,
+              scaleX: hoverRect.width / 370,
+              scaleY: hoverRect.height / 418,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 320,
+              damping: 30,
+              mass: 0.9,
+            }}
+            onMouseLeave={handleDateLeave}
           >
-            <motion.div 
-              className="relative"
-              initial={{ scale: 0.8, opacity: 0, y: 50 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.8, opacity: 0, y: 50 }}
+            <div
+              className="h-[418px] w-[370px] rounded-[20px] bg-cover bg-center bg-no-repeat shadow-[0_15px_35px_rgba(0,0,0,0.35)]"
+              style={{
+                backgroundImage: `url(${selectedDay.imageUrl || "/images/dream-background.png"})`,
+              }}
+            />
+          </motion.div>,
+          document.body
+        )}
+      </AnimatePresence>
+
+      {/* Open modal: animate from cell (bottom-left) into centered DreamCard */}
+      <AnimatePresence>
+        {isOpen && selectedDay && hoverRect && openTarget && createPortal(
+          <>
+            <motion.div
+              className="fixed inset-0 z-40 bg-black/40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={handleClose}
+            />
+            <motion.div
+              key={`dreamcard-open-${selectedDay.date}`}
+              className="fixed z-50 left-0 top-0"
+              style={{
+                transformOrigin: "bottom left",
+              }}
+              initial={{
+                opacity: 1,
+                x: hoverRect.left,
+                y: hoverRect.bottom - 418,
+                scaleX: hoverRect.width / 370,
+                scaleY: hoverRect.height / 418,
+              }}
+              animate={{
+                x: openTarget.left,
+                y: openTarget.top,
+                scaleX: 1,
+                scaleY: 1,
+              }}
+              exit={{
+                x: hoverRect.left,
+                y: hoverRect.bottom - 418,
+                scaleX: hoverRect.width / 370,
+                scaleY: hoverRect.height / 418,
+              }}
               transition={{
                 type: "spring",
-                stiffness: 300,
-                damping: 25,
-                mass: 0.8
+                stiffness: 320,
+                damping: 30,
+                mass: 0.9,
               }}
             >
-              <DreamCard
-                date={`${selectedDay.date.toString().padStart(2, "0")} ${monthNames[currentMonth]}`}
-                title="Dream Entry"
-                description="A beautiful moment captured in time, filled with wonder and inspiration."
-                backgroundImage={selectedDay.imageUrl || "/images/dream-background.png"}
-              />
+              <div className="relative h-[418px] w-[370px]">
+                <div
+                  className="absolute inset-0 rounded-[20px] bg-cover bg-center bg-no-repeat shadow-[0_20px_50px_rgba(0,0,0,0.4)]"
+                  style={{
+                    backgroundImage: `url(${selectedDay.imageUrl || "/images/dream-background.png"})`,
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-0"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ delay: 0.2, duration: 0.25 }}
+                  style={{ pointerEvents: "none" }}
+                >
+                  <DreamCard
+                    date={`${selectedDay.date.toString().padStart(2, "0")} ${monthNames[currentMonth]}`}
+                    title="Dream Entry"
+                    description="A beautiful moment captured in time, filled with wonder and inspiration."
+                    backgroundImage={selectedDay.imageUrl || "/images/dream-background.png"}
+                    disableEntranceAnimations
+                  />
+                </motion.div>
+              </div>
             </motion.div>
-          </motion.div>
+          </>,
+          document.body
         )}
       </AnimatePresence>
     </div>
