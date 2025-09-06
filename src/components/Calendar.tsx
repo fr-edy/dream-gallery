@@ -10,6 +10,7 @@ interface CalendarProps {
   initialYear?: number;
   className?: string;
   onDateSelect?: (date: Date) => void;
+  onMonthlyRecap?: (date: Date) => void;
 }
 
 interface CalendarDay {
@@ -17,6 +18,7 @@ interface CalendarDay {
   hasImage: boolean;
   imageUrl: string | undefined;
   isCurrentMonth: boolean;
+  isFuture: boolean;
 }
 
 const Calendar: React.FC<CalendarProps> = ({
@@ -24,6 +26,7 @@ const Calendar: React.FC<CalendarProps> = ({
   initialYear = 2025,
   className = "",
   onDateSelect,
+  onMonthlyRecap,
 }) => {
   const [currentMonth, setCurrentMonth] = useState(initialMonth);
   const [currentYear, setCurrentYear] = useState(initialYear);
@@ -124,6 +127,8 @@ const Calendar: React.FC<CalendarProps> = ({
     const daysInMonth = getDaysInMonth(currentMonth, currentYear);
     const firstDay = getFirstDayOfMonth(currentMonth, currentYear);
     const days: CalendarDay[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < firstDay; i++) {
@@ -132,17 +137,31 @@ const Calendar: React.FC<CalendarProps> = ({
         hasImage: false,
         imageUrl: undefined,
         isCurrentMonth: false,
+        isFuture: false,
       });
     }
 
     // Add days of the current month
     for (let day = 1; day <= daysInMonth; day++) {
-      const hasImage = !!daysWithImages[day];
+      const cellDate = new Date(currentYear, currentMonth, day);
+      cellDate.setHours(0, 0, 0, 0);
+      const isFuture = cellDate.getTime() > today.getTime();
+
+      const baseHasImage = !!daysWithImages[day];
+      let imageUrl = baseHasImage ? daysWithImages[day] : undefined;
+      let hasImage = baseHasImage;
+
+      if (isFuture) {
+        imageUrl = "/images/3155730961d37f7f8480dc2d95216bd0.jpg";
+        hasImage = true;
+      }
+
       days.push({
         date: day,
         hasImage,
-        imageUrl: hasImage ? daysWithImages[day] : undefined,
+        imageUrl,
         isCurrentMonth: true,
+        isFuture,
       });
     }
 
@@ -306,7 +325,7 @@ const Calendar: React.FC<CalendarProps> = ({
                 : "invisible"
             } `}
             style={{
-              backgroundImage: day.hasImage
+              backgroundImage: day.hasImage && !day.isFuture
                 ? `url(${day.imageUrl})`
                 : undefined,
             }}
@@ -351,6 +370,16 @@ const Calendar: React.FC<CalendarProps> = ({
               handleDateLeave();
             }}
           >
+            {day.isCurrentMonth && day.isFuture && day.imageUrl && (
+              <div
+                className="absolute inset-0 rounded-lg bg-cover bg-center bg-no-repeat"
+                style={{
+                  backgroundImage: `url(${day.imageUrl})`,
+                  opacity: 0.6,
+                  pointerEvents: "none",
+                }}
+              />
+            )}
             {day.isCurrentMonth && (
               <motion.span
                 className={`font-serif text-3xl leading-tight ${
@@ -470,12 +499,6 @@ const Calendar: React.FC<CalendarProps> = ({
               }}
             >
               <div className="relative h-[418px] w-[370px]">
-                <div
-                  className="absolute inset-0 rounded-[20px] bg-cover bg-center bg-no-repeat shadow-[0_20px_50px_rgba(0,0,0,0.4)]"
-                  style={{
-                    backgroundImage: `url(${selectedDay.imageUrl || "/images/dream-background.png"})`,
-                  }}
-                />
                 <motion.div
                   className="absolute inset-0"
                   initial={{ opacity: 0 }}
@@ -487,7 +510,7 @@ const Calendar: React.FC<CalendarProps> = ({
                   <DreamCard
                     date={`${selectedDay.date.toString().padStart(2, "0")} ${monthNames[currentMonth]}`}
                     title="Dream Entry"
-                    description="A beautiful moment captured in time, filled with wonder and inspiration."
+                    description={selectedDay.isFuture ? "this dream is not yet dreamt" : "A beautiful moment captured in time, filled with wonder and inspiration."}
                     backgroundImage={selectedDay.imageUrl || "/images/dream-background.png"}
                     disableEntranceAnimations
                   />
@@ -497,6 +520,21 @@ const Calendar: React.FC<CalendarProps> = ({
           </>
         )}
       </AnimatePresence>
+
+      {/* Monthly Recap button */}
+      <div className="mt-6 flex justify-center">
+        <button
+          onClick={() =>
+            onMonthlyRecap
+              ? onMonthlyRecap(new Date(currentYear, currentMonth, 1))
+              : console.log("Monthly recap clicked", { currentYear, currentMonth })
+          }
+          className="rounded-lg bg-black px-4 py-2 font-serif text-white transition hover:bg-gray-800"
+          aria-label="Monthly recap"
+        >
+          Monthly recap
+        </button>
+      </div>
     </div>
   );
 };
