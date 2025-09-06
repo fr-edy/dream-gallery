@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import Head from "next/head";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,9 +44,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* External styles and scripts should be imported in a different way for Next.js */}
+        {/* External styles */}
         <link rel="stylesheet" href="/liqglass/glass.css" />
-        <script 
+      </head>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} antialiased`}
+      >
+        {/* Load scripts in proper order using regular script tags */}
+        <script
           src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"
           async
         />
@@ -66,7 +70,7 @@ export default function RootLayout({
                 baseDistance: 0.1,        // Smooth base falloff (was 0.1)
                 cornerBoost: 0.02,        // Enhanced corner effects (was 0.02)
                 rippleEffect: 0.1,         // Subtle surface texture (was 0.1)
-                blurRadius: 5,           // Optimal blur for glass (was 2.0/5.0)
+                blurRadius: 1,           // Optimal blur for glass (was 2.0/5.0)
                 tintOpacity: 0.2          // Subtle tint overlay (was 0.2)
               };
 
@@ -107,13 +111,9 @@ export default function RootLayout({
               setTimeout(() => {
                 updateAllGlassInstances();
               }, 100);
-            `
+            `,
           }}
         />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} antialiased`}
-      >
         {children}
       </body>
     </html>

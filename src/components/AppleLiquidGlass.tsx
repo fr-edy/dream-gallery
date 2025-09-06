@@ -253,7 +253,7 @@ export default function AppleLiquidGlass({
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: `url(${backgroundImage})`,
-            filter: "brightness(0.5) contrast(1.1)",
+            filter: "brightness(0.4) contrast(0.6)",
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-transparent to-blue-900/30" />

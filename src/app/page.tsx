@@ -1,12 +1,9 @@
 "use client";
 
 import AppleLiquidGlass from "@/components/AppleLiquidGlass";
-import GlassButton from "@/components/GlassButton";
-import { ChevronRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export default function Home() {
-
-  
   return (
     <div className="h-screen w-full overflow-hidden">
       <AppleLiquidGlass
@@ -18,24 +15,30 @@ export default function Home() {
             <h1 className="font-serif text-6xl font-thin text-white">
               Dreamer
             </h1>
-            <p className="mx-auto max-w-xl font-serif text-lg text-white/60 md:text-xl">
+            <p className="mx-auto max-w-xl font-serif text-lg text-white/80 md:text-xl">
               Crafted with elegance, designed for dreams
             </p>
 
-            <div className="mt-12 flex flex-col items-center gap-6 sm:flex-row">
+            <a href="/calendar" className="flex space-x-2 text-white items-center group">
+              <span>Explore Dreams</span>
+              <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-all" />
+            </a>
+
+            {/* <GlassContainer>
               <GlassButton
+                text="Explore dreams"
                 onClick={() => {
-                  window.location.href = '/calendar';
+                  window.location.href = "/calendar";
                 }}
-                className="text-md font-serif font-light text-white/90 transition-colors hover:text-white w-40 h-10"
-              >
-                <div className="flex items-center gap-2">
-                  <span>Explore Dreams</span>
-                  <ChevronRight className="w-4 h-4" />
-                </div>
-              </GlassButton>
-              
-            </div>
+              ></GlassButton>
+            </GlassContainer>
+
+            <GlassButton
+              text="Explore dreams"
+              onClick={() => {
+                window.location.href = "/calendar";
+              }}
+            ></GlassButton> */}
           </div>
         </div>
       </AppleLiquidGlass>
