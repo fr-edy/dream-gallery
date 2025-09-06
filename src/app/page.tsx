@@ -1,29 +1,46 @@
 "use client";
 
+import AppleLiquidGlass from "@/components/AppleLiquidGlass";
+import GlassContainer from "@/components/GlassContainer";
+
 export default function Home() {
   return (
-    <div className="">
-      <div className="relative m-10 min-h-screen overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: "url('/images/landing-bg.jpeg')",
-            filter: "brightness(0.5)",
-          }}
-        />
+    <div className="h-screen w-full overflow-hidden">
+      <AppleLiquidGlass
+        backgroundImage="/images/landing-bg.jpeg"
+        className="h-full w-full"
+      >
+        <div className="flex h-full w-full items-center justify-center">
+          <div className="space-y-8 text-center">
+            <h1 className="text-6xl font-light tracking-wider text-white/90 md:text-8xl">
+              Dream Gallery
+            </h1>
+            <p className="mx-auto max-w-2xl text-xl leading-relaxed font-light text-white/70 md:text-2xl">
+              Where liquid glass meets infinite imagination
+            </p>
 
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 transform">
-          <nav className="">
-            <ul className="flex space-x-8 font-medium text-white">
-              <li>
-                <a href="#" className="hover:text-gray-300">
-                  Gallery
+            <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row">
+              <GlassContainer className="px-8 py-4">
+                <a
+                  href="#"
+                  className="text-lg font-light tracking-wide text-white/90 transition-colors hover:text-white"
+                >
+                  Explore Dreams
                 </a>
-              </li>
-            </ul>
-          </nav>
+              </GlassContainer>
+
+              <GlassContainer className="px-8 py-4" variant="secondary">
+                <a
+                  href="#"
+                  className="text-lg font-light tracking-wide text-white/90 transition-colors hover:text-white"
+                >
+                  Create Magic
+                </a>
+              </GlassContainer>
+            </div>
+          </div>
         </div>
-      </div>
+      </AppleLiquidGlass>
     </div>
   );
 }
