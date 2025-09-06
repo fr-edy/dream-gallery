@@ -12,11 +12,9 @@ export default function Home() {
       >
         <div className="flex h-full w-full items-center justify-center">
           <div className="space-y-8 text-center">
-            <h1 className="text-6xl font-light tracking-wider text-white/90 md:text-8xl">
-              Dream Gallery
-            </h1>
-            <p className="mx-auto max-w-2xl text-xl leading-relaxed font-light text-white/70 md:text-2xl">
-              Where liquid glass meets infinite imagination
+            <h1 className="text-6xl font-light text-white">Dream Gallery</h1>
+            <p className="mx-auto max-w-xl font-serif text-lg text-white/60 italic md:text-xl">
+              Crafted with elegance, designed for dreams
             </p>
 
             <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row">
