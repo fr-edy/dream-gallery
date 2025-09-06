@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import TelegramLogin from './TelegramLogin';
 import AppleLiquidGlass from './AppleLiquidGlass';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -28,7 +28,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           <div className="container mx-auto px-4 py-8">
             <div className="flex items-center justify-center min-h-[60vh]">
               <div className="text-center text-white">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                <Loader2 className='animate-spin' />
                 <p>Loading...</p>
               </div>
             </div>

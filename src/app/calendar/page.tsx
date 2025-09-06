@@ -5,11 +5,14 @@ import AppleLiquidGlass from "@/components/AppleLiquidGlass";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { useDreams } from "@/hooks/useDreams";
 
 export default function CalendarPage() {
   const handleDateSelect = (_date: Date) => {
     // You can add more functionality here, like opening a modal or navigating to a specific day
   };
+
+  useDreams();
 
   return (
     <ProtectedRoute>

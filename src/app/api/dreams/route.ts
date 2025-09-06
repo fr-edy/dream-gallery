@@ -1,9 +1,30 @@
-import { createBrowserClient } from "@supabase/ssr";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
-export async function POST(req: Request) {
-  const supabase = await createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string
+export async function GET(req: Request) {
+  const cookieStore = await cookies();
+  
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+      },
+    }
   );
 
   // fetch Dreams db with supabase client
@@ -11,8 +32,7 @@ export async function POST(req: Request) {
   const { data, error } = await supabase
     .from("Dreams")
     .select("*")
-    // .eq("user_id", userId)
-    .order("idx", { ascending: false });
+    .order('created_at', { ascending: false })
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {
