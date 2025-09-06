@@ -524,11 +524,7 @@ const Calendar: React.FC<CalendarProps> = ({
       {/* Monthly Recap button */}
       <div className="mt-6 flex justify-center">
         <button
-          onClick={() =>
-            onMonthlyRecap
-              ? onMonthlyRecap(new Date(currentYear, currentMonth, 1))
-              : console.log("Monthly recap clicked", { currentYear, currentMonth })
-          }
+          onClick={() => onMonthlyRecap?.(new Date(currentYear, currentMonth, 1))}
           className="rounded-lg bg-black px-4 py-2 font-serif text-white transition hover:bg-gray-800"
           aria-label="Monthly recap"
         >

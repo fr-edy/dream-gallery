@@ -1,0 +1,1250 @@
+{
+  "name": "Dreamer",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -416,
+        -144
+      ],
+      "id": "ae1b583d-08e7-4602-ad56-ae1808f61e5d",
+      "name": "Telegram Trigger",
+      "webhookId": "44512123-77ad-444a-84a0-83051bd15604",
+      "credentials": {
+        "telegramApi": {
+          "id": "io25tP3qHj4PpLAF",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "classify",
+        "input": "={{ $json.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1328,
+        0
+      ],
+      "id": "9aed27c2-420e-468c-abba-2ab80344ab98",
+      "name": "Classify text for violations",
+      "credentials": {
+        "openAiApi": {
+          "id": "F3Jaz5zgJk91gJn2",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "GPT-3.5-TURBO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Create 3 to 5 image prompts for this description of a dream. Every prompt should describe a new scene or major difference in the dream. The prompts should be detailed for another AI to use and create images. The style of the images should be renaissance painting style.\nThe Dream: {{ $('Forward Text').item.json.text }}\n\nthe output should be json of just the image prompts: \n\n{image_prompts: \nimage_prompt[0]: \"text\", \nimage_prompt[1]: \"text\", etc}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        2064,
+        16
+      ],
+      "id": "b7099608-b86e-4dc3-9f97-cba0a505b26c",
+      "name": "Create Image prompts",
+      "credentials": {
+        "openAiApi": {
+          "id": "F3Jaz5zgJk91gJn2",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3808,
+        80
+      ],
+      "id": "76cb6eaf-202f-4789-9fcb-3b99a843dfa6",
+      "name": "Send a photo message",
+      "webhookId": "0537b4d6-fd81-4272-b2a9-04ce5c2a012a",
+      "credentials": {
+        "telegramApi": {
+          "id": "io25tP3qHj4PpLAF",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "hour": 8
+            }
+          ]
+        }
+      },
+      "id": "7b658353-38a4-4c89-a6a6-d77b54e55368",
+      "name": "Daily Reminder (08:00 Berlin)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{7323346336}}",
+        "text": "🌅 Good morning sexy! Send me a voice note (or text) describing last night’s dream. I’ll turn it into a multi-scene visual story with narration. ✨",
+        "replyMarkup": "forceReply",
+        "forceReply": {},
+        "additionalFields": {}
+      },
+      "id": "9ce32179-7639-4203-a8aa-e6a8dc1ff304",
+      "name": "Telegram: Send Reminder",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        32
+      ],
+      "webhookId": "89415270-d110-407e-8183-ee3f4fe10890",
+      "credentials": {
+        "telegramApi": {
+          "id": "io25tP3qHj4PpLAF",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cff184bc-608e-43c4-9746-c7592b5b83ec",
+              "leftValue": "={{ $json.flagged }}",
+              "rightValue": "1",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d289398f-dfdc-4c3c-b501-8e49beba483a",
+      "name": "Unsafe?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1696,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cee42638-3311-48fb-9450-81143329300c",
+              "leftValue": "={{ $json.isAudio }}",
+              "rightValue": "text",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        -144
+      ],
+      "id": "2f225949-d8ea-4d63-ae6e-a270668e3040",
+      "name": "If no audio"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst isAudio = items.map((item) => {\n  return {\n    isAudio:\n      item?.json?.message?.audio?.mime_type === \"audio/ogg\" ? true : false,\n  };\n});\nreturn isAudio;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        -144
+      ],
+      "id": "c87f999d-6f77-44dc-ae70-9819b3d7daf8",
+      "name": "Check if audio"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "Sorry Dear, I cannot comply with this for safety reasons. Get help. ",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2064,
+        -144
+      ],
+      "id": "05e10bf6-d7e1-4964-8b00-75bf4abd88ee",
+      "name": "Send a text message",
+      "webhookId": "fd93953f-465e-4511-8222-87208ecdd3a9",
+      "credentials": {
+        "telegramApi": {
+          "id": "io25tP3qHj4PpLAF",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.result.sample }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3568,
+        0
+      ],
+      "id": "6a87149b-ef8e-4cd8-ac0d-bf6adbbe687a",
+      "name": "Get Result"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Start FLUX Generation Job').item.json.polling_url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3072,
+        16
+      ],
+      "id": "ea8769b3-5cef-4648-a196-55925cf87428",
+      "name": "Do the Polling",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "cRNYxZLtx5kPl8P8",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d35ae158-063c-49e6-a13b-3c7fe086534f",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "=Ready",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3280,
+        16
+      ],
+      "id": "aa35382c-3a1b-44ed-83e4-7b7600503738",
+      "name": "Is it ready?"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3296,
+        256
+      ],
+      "id": "ea0cd370-7c21-4d17-9d36-ee4508ef9624",
+      "name": "Wait",
+      "webhookId": "b7b3b366-8210-4e20-883f-a959eeb6ee1b"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.bfl.ai/v1/flux-kontext-pro",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ Object.values($json).find(v => typeof v === 'string') }}\n"
+            },
+            {
+              "name": "aspect_ratio",
+              "value": "1:1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2800,
+        16
+      ],
+      "id": "4356cf5f-2ce5-4766-a568-16571537e255",
+      "name": "Start FLUX Generation Job",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "0j2e3B1QNgbRUp3e",
+          "name": "Header Auth account 2"
+        },
+        "httpBearerAuth": {
+          "id": "7ruMmf3kKsXbyXLB",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "Dreams",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "image",
+              "fieldValue": "data"
+            },
+            {
+              "fieldId": "message_id",
+              "fieldValue": "={{ $('Telegram Trigger').item.json.message.message_id }}"
+            },
+            {
+              "fieldId": "prompt",
+              "fieldValue": "={{ $('Create List').item.json.prompt }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3808,
+        -96
+      ],
+      "id": "b102a6f5-c22a-43a0-acdb-07bdb82ccf2e",
+      "name": "Save Image to DB",
+      "alwaysOutputData": false,
+      "credentials": {
+        "supabaseApi": {
+          "id": "6e6IikzTjIOmRVKD",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "592431b0-b9ad-42cd-bd6b-79d8d6a3c5d9",
+              "leftValue": "={{ $('Telegram Trigger').item.json.message.reply_to_message }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        576,
+        -272
+      ],
+      "id": "790dfbb4-3fb6-4002-85f4-57e7b2cde135",
+      "name": "If answer"
+    },
+    {
+      "parameters": {
+        "jsCode": "const telegramTriggerData = $(\"Telegram Trigger\").first()?.json;\nconst photoExists = !!telegramTriggerData?.message?.reply_to_message?.photo;\n\nreturn { photoExists };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        -432
+      ],
+      "id": "cf20ea88-69ac-4c00-aaf7-b9418359c0d1",
+      "name": "Check if answer on image"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Telegram Trigger').item.json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "id": "2658ebba-56d6-4bd1-a183-fad26d47cdb6",
+      "name": "Get audio file",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        448,
+        0
+      ],
+      "webhookId": "73d0d328-d75b-4bb0-a1b9-81d42a2f2bfd",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "io25tP3qHj4PpLAF",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "a3428c63-3da9-4cc0-8cda-ff30514d98b2",
+      "name": "Transcribe audio",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        672,
+        0
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "F3Jaz5zgJk91gJn2",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const isAudio = $input.all()[0]?.json?.isAudio;\nlet text;\n\nif (isAudio) {\n  const audioData = $(\"Check if audio\").all()[0];\n  text = audioData?.json?.transcribedText;\n} else {\n  const telegramData = $(\"Telegram Trigger\").all()[0];\n  text = telegramData?.json?.message?.text;\n}\n\nreturn { text };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "98d4a0a2-fa82-48e2-ad54-98b4bff6a87b",
+      "name": "Forward Text"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code node (JavaScript)\n// Reads $input.first().json.message.content and returns one item per prompt string.\n\nconst content = $input.first().json?.message?.content ?? {};\n\nfunction extractStringList(obj) {\n  // 1) If it's already an array, pull strings (and strings nested one level deep)\n  if (Array.isArray(obj)) {\n    return obj.map(el => {\n      if (typeof el === 'string') return el;\n      if (el && typeof el === 'object') {\n        const s = Object.values(el).find(v => typeof v === 'string');\n        return s || null;\n      }\n      return null;\n    }).filter(Boolean);\n  }\n\n  // 2) If it's an object like { image_prompt_1: \"...\", image_prompt_2: \"...\" }\n  if (obj && typeof obj === 'object') {\n    const values = Object.values(obj);\n    // If most values are strings or objects-with-a-string, treat this as the list\n    const strings = values.map(v => {\n      if (typeof v === 'string') return v;\n      if (v && typeof v === 'object') {\n        const s = Object.values(v).find(x => typeof x === 'string');\n        return s || null;\n      }\n      return null;\n    }).filter(Boolean);\n\n    if (strings.length >= 1) return strings;\n\n    // Otherwise, search deeper\n    for (const v of values) {\n      const found = extractStringList(v);\n      if (found.length) return found;\n    }\n  }\n\n  return [];\n}\n\nlet prompts = [];\nfor (const v of Object.values(content)) {\n  prompts = extractStringList(v);\n  if (prompts.length) break; // take the first list we find\n}\n\nif (!prompts.length) {\n  throw new Error('No list of prompts found under message.content.');\n}\n\n// Return one item per prompt (consistent with n8n item processing)\nreturn prompts.map(p => ({ json: { prompt: p } }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2544,
+        16
+      ],
+      "id": "9665e726-b19c-44f9-88d7-ec2c0d85da95",
+      "name": "Create List"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "GPT-3.5-TURBO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Classify the dream into a dream category\n\n {{ $('Forward Text').item.json.text }}\n\nThe output should just be just the category"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        2064,
+        224
+      ],
+      "id": "948042f9-68e0-44e4-85ad-813b289ec6e4",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "F3Jaz5zgJk91gJn2",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "882b1f20-6658-4c8c-bd3e-0535ab27ffff",
+              "leftValue": "={{ $json.photoExists }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1088,
+        -432
+      ],
+      "id": "499ce799-09f8-4750-b885-ad9fc4997750",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4064,
+        80
+      ],
+      "id": "75d38dea-dccf-4a19-af09-c1d91f8f14da",
+      "name": "Wait2",
+      "webhookId": "fe2c2630-f1b4-4d77-91e1-5fbb1bd84a82"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "Dreams",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "prompt",
+              "keyValue": "={{ $('Create List').item.json.prompt }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4304,
+        80
+      ],
+      "id": "b37f1cd4-22ec-4821-aaa9-5ce231e9b4d2",
+      "name": "Get image1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "6e6IikzTjIOmRVKD",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "Dreams",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "return_message_id",
+              "fieldValue": "={{ $('Send a photo message').item.json.result.message_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4528,
+        80
+      ],
+      "id": "fa1c1b6a-f84e-46e6-b207-60153306a1ae",
+      "name": "Update a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "6e6IikzTjIOmRVKD",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2400,
+        224
+      ],
+      "id": "bc5cba11-38cf-4750-aa2b-b3fba9f878ee",
+      "name": "Wait3",
+      "webhookId": "fe2c2630-f1b4-4d77-91e1-5fbb1bd84a82"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "Dreams",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "prompt",
+              "keyValue": "={{ $('Create List').item.json.prompt }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2592,
+        224
+      ],
+      "id": "022d8aa4-91a3-407b-97a9-f0770a137644",
+      "name": "Get image",
+      "credentials": {
+        "supabaseApi": {
+          "id": "6e6IikzTjIOmRVKD",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "Dreams",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "dream_category",
+              "fieldValue": "={{ $('Message a model').item.json.message.content }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2784,
+        224
+      ],
+      "id": "6bdd190c-7338-400b-b233-c1de96a4f001",
+      "name": "Update a row1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "6e6IikzTjIOmRVKD",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "GPT-3.5-TURBO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Summarize the dream in 100 characters or less.\n {{ $('Forward Text').item.json.text }}\n\nThe output should just be just the summary"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        2064,
+        416
+      ],
+      "id": "9074b2b6-f627-4946-ad11-2fd443ec2c0a",
+      "name": "Message a model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "F3Jaz5zgJk91gJn2",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2400,
+        416
+      ],
+      "id": "5f07190a-421b-4f64-9a70-94cd4eea78d3",
+      "name": "Wait4",
+      "webhookId": "fe2c2630-f1b4-4d77-91e1-5fbb1bd84a82"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "Dreams",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "prompt",
+              "keyValue": "={{ $('Create List').item.json.prompt }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2592,
+        416
+      ],
+      "id": "3b69f25a-14cc-49f4-88e7-2aa051f4ee3e",
+      "name": "Get image2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "6e6IikzTjIOmRVKD",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "Dreams",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "dream_category",
+              "fieldValue": "={{ $('Message a model1').item.json.message.content }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2784,
+        416
+      ],
+      "id": "702e8f1c-76df-4e36-8d2a-4eb0b939aac5",
+      "name": "Update a row2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "6e6IikzTjIOmRVKD",
+          "name": "Supabase account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check if audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify text for violations": {
+      "main": [
+        [
+          {
+            "node": "Unsafe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image prompts": {
+      "main": [
+        [
+          {
+            "node": "Create List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a photo message": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Reminder (08:00 Berlin)": {
+      "main": [
+        [
+          {
+            "node": "Telegram: Send Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If no audio": {
+      "main": [
+        [
+          {
+            "node": "If answer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get audio file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if audio": {
+      "main": [
+        [
+          {
+            "node": "If no audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unsafe?": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Image prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Result": {
+      "main": [
+        [
+          {
+            "node": "Send a photo message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save Image to DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Do the Polling": {
+      "main": [
+        [
+          {
+            "node": "Is it ready?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is it ready?": {
+      "main": [
+        [
+          {
+            "node": "Get Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Do the Polling",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start FLUX Generation Job": {
+      "main": [
+        [
+          {
+            "node": "Do the Polling",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Image to DB": {
+      "main": [
+        []
+      ]
+    },
+    "If answer": {
+      "main": [
+        [
+          {
+            "node": "Check if answer on image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Forward Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if answer on image": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram: Send Reminder": {
+      "main": [
+        [
+          {
+            "node": "Check if audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get audio file": {
+      "main": [
+        [
+          {
+            "node": "Transcribe audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe audio": {
+      "main": [
+        [
+          {
+            "node": "Forward Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Forward Text": {
+      "main": [
+        [
+          {
+            "node": "Classify text for violations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create List": {
+      "main": [
+        [
+          {
+            "node": "Start FLUX Generation Job",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Forward Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Get image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get image1": {
+      "main": [
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "Get image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get image": {
+      "main": [
+        [
+          {
+            "node": "Update a row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Wait4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait4": {
+      "main": [
+        [
+          {
+            "node": "Get image2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get image2": {
+      "main": [
+        [
+          {
+            "node": "Update a row2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "52f254de-d7db-4bbf-88da-97edb17fcb2d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "336ec83870bf30d24cf43f7f75c507ba6fd4beb82bee7e8da0a9d66ab9e3f311"
+  },
+  "id": "491ijn9mbTTo3BOT",
+  "tags": []
+}
