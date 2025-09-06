@@ -20,10 +20,10 @@ export default function Home() {
             <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row">
               <GlassContainer className="px-8 py-4">
                 <a
-                  href="#"
+                  href="/calendar"
                   className="text-lg font-light tracking-wide text-white/90 transition-colors hover:text-white"
                 >
-                  Explore Dreams
+                  View Calendar
                 </a>
               </GlassContainer>
 
