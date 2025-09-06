@@ -6,6 +6,7 @@ interface DreamCardProps {
   title: string;
   description: string;
   backgroundImage?: string;
+  backgroundOpacity?: number;
   disableEntranceAnimations?: boolean;
 }
 
@@ -14,14 +15,12 @@ const DreamCard: React.FC<DreamCardProps> = ({
   title,
   description,
   backgroundImage = "/images/dream-background.png",
+  backgroundOpacity = 1,
   disableEntranceAnimations = false,
 }) => {
   return (
     <motion.div
-      className="relative flex h-[418px] w-[370px] items-end overflow-hidden rounded-[20px] bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-      }}
+      className="relative flex h-[418px] w-[370px] items-end overflow-hidden rounded-[20px]"
       {...(!disableEntranceAnimations
         ? {
             initial: { scale: 0.9, opacity: 0 },
@@ -47,6 +46,14 @@ const DreamCard: React.FC<DreamCardProps> = ({
         mass: 0.8
       }}
     >
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          opacity: backgroundOpacity,
+          pointerEvents: "none",
+        }}
+      />
       <motion.div 
         className="flex flex-grow flex-col items-start rounded-tr-[3px] rounded-br-[20px] rounded-bl-[20px] bg-white/[0.067] p-[17px_20px_5px_20px] shadow-[inset_0px_-1px_9px_0px_rgba(255,255,255,0.125),inset_0px_0px_4px_0px_rgba(255,255,255,0.125),0px_4px_4px_0px_rgba(0,0,0,0.25),3px_5px_48px_-12px_rgba(0,0,0,0.15),0px_1px_12px_-8px_rgba(0,0,0,0.15)] backdrop-blur-[5px]"
         {...(!disableEntranceAnimations
