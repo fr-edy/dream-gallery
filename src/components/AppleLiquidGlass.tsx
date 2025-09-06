@@ -106,6 +106,10 @@ const fragmentShader = `
     float colorShift = sin(uTime + distortedUv.x * 6.0) * 0.015;
     color.rgb += vec3(colorShift, colorShift * 0.8, colorShift * 1.2);
     
+    // Mix with white background at 60% transparency
+    vec3 whiteBackground = vec3(1.0, 1.0, 1.0);
+    color.rgb = mix(whiteBackground, color.rgb, 0.6);
+    
     gl_FragColor = color;
   }
 `;
@@ -249,6 +253,10 @@ export default function AppleLiquidGlass({
   if (webglSupported || true) {
     return (
       <div ref={containerRef} className={`relative h-full w-full ${className}`}>
+        {/* White background */}
+        <div className="absolute inset-0 bg-white" />
+        
+        {/* Background image with 60% transparency */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
@@ -267,6 +275,9 @@ export default function AppleLiquidGlass({
 
   return (
     <div ref={containerRef} className={`relative h-full w-full ${className}`}>
+      {/* White background */}
+      <div className="absolute inset-0 bg-white" />
+      
       <Canvas
         camera={{ position: [0, 0, 1], fov: 75 }}
         style={{
