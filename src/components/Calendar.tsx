@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { ChevronUp, ChevronDown, User } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import DreamCard from "./DreamCard";
+import { Dream } from "@/types/dream";
+import { useDreams } from "@/hooks/useDreams";
 
 interface CalendarProps {
   initialMonth?: number;
@@ -41,6 +43,9 @@ const Calendar: React.FC<CalendarProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [openTarget, setOpenTarget] = useState<{ left: number; top: number } | null>(null);
 
+  // Fetch dreams from database
+  const { dreams } = useDreams();
+
   const monthNames = [
     "January",
     "February",
@@ -73,14 +78,43 @@ const Calendar: React.FC<CalendarProps> = ({
     "/images/st-jerome-2-2.jpg", // Classical painting 11
   ];
 
-  // Function to get a random painting for a day
+  // Function to get a random painting for a day (fallback)
   const getRandomPainting = (day: number): string => {
     const randomIndex = (day - 1) % classicalPaintings.length;
     return classicalPaintings[randomIndex] || classicalPaintings[0] || "";
   };
 
-  // Sample data for days with images using classical paintings
-  const daysWithImages: { [key: number]: string } = {
+  // Create a mapping of days to dreams for the current month/year
+  const daysWithDreams = useMemo(() => {
+    const dreamMap: { [key: number]: Dream } = {};
+    
+    if (!dreams || !Array.isArray(dreams)) {
+      return dreamMap;
+    }
+    
+    dreams.forEach((dream) => {
+      const dreamDate = new Date(dream.created_at);
+      const dreamMonth = dreamDate.getMonth();
+      const dreamYear = dreamDate.getFullYear();
+      const dreamDay = dreamDate.getDate();
+      
+      // Only include dreams from current month/year
+      if (dreamMonth === currentMonth && dreamYear === currentYear) {
+        // If there's already a dream for this day, keep the most recent one
+        if (!dreamMap[dreamDay] || new Date(dream.created_at) > new Date(dreamMap[dreamDay].created_at)) {
+          // Only include dreams with valid image URLs
+          if (dream.image && dream.image.trim() !== '') {
+            dreamMap[dreamDay] = dream;
+          }
+        }
+      }
+    });
+    
+    return dreamMap;
+  }, [dreams, currentMonth, currentYear]);
+
+  // Fallback data for days without database entries using classical paintings
+  const fallbackDaysWithImages: { [key: number]: string } = {
     1: getRandomPainting(1),
     2: getRandomPainting(2),
     3: getRandomPainting(3),
@@ -147,12 +181,22 @@ const Calendar: React.FC<CalendarProps> = ({
       cellDate.setHours(0, 0, 0, 0);
       const isFuture = cellDate.getTime() > today.getTime();
 
-      const baseHasImage = !!daysWithImages[day];
-      let imageUrl = baseHasImage ? daysWithImages[day] : undefined;
-      let hasImage = baseHasImage;
+      // Check if there's a dream entry for this day
+      const dreamEntry = daysWithDreams[day];
+      let imageUrl: string | undefined;
+      let hasImage = false;
 
       if (isFuture) {
+        // Future days get the special future image
         imageUrl = "/images/3155730961d37f7f8480dc2d95216bd0.jpg";
+        hasImage = true;
+      } else if (dreamEntry) {
+        // Use the dream's image URL if available
+        imageUrl = dreamEntry.image;
+        hasImage = true;
+      } else if (fallbackDaysWithImages[day]) {
+        // Fall back to placeholder classical paintings for past days without dreams
+        imageUrl = fallbackDaysWithImages[day];
         hasImage = true;
       }
 
@@ -444,11 +488,18 @@ const Calendar: React.FC<CalendarProps> = ({
             }}
             onMouseLeave={handleDateLeave}
           >
-            <div
-              className="h-[418px] w-[370px] rounded-[20px] bg-cover bg-center bg-no-repeat shadow-[0_15px_35px_rgba(0,0,0,0.35)]"
-              style={{
-                backgroundImage: `url(${selectedDay.imageUrl || "/images/dream-background.png"})`,
-              }}
+            <DreamCard
+              date={`${selectedDay.date.toString().padStart(2, "0")} ${monthNames[currentMonth]}`}
+              title="Dream Entry"
+              description={
+                selectedDay.isFuture 
+                  ? "this dream is not yet dreamt" 
+                  : daysWithDreams[selectedDay.date]?.dream_summary || 
+                    daysWithDreams[selectedDay.date]?.dream_category || 
+                    "A beautiful moment captured in time, filled with wonder and inspiration."
+              }
+              backgroundImage={selectedDay.imageUrl || "/images/dream-background.png"}
+              disableEntranceAnimations
             />
           </motion.div>
         )}
@@ -510,7 +561,13 @@ const Calendar: React.FC<CalendarProps> = ({
                   <DreamCard
                     date={`${selectedDay.date.toString().padStart(2, "0")} ${monthNames[currentMonth]}`}
                     title="Dream Entry"
-                    description={selectedDay.isFuture ? "this dream is not yet dreamt" : "A beautiful moment captured in time, filled with wonder and inspiration."}
+                    description={
+                      selectedDay.isFuture 
+                        ? "this dream is not yet dreamt" 
+                        : daysWithDreams[selectedDay.date]?.dream_summary || 
+                          daysWithDreams[selectedDay.date]?.dream_category || 
+                          "A beautiful moment captured in time, filled with wonder and inspiration."
+                    }
                     backgroundImage={selectedDay.imageUrl || "/images/dream-background.png"}
                     disableEntranceAnimations
                   />

@@ -3,7 +3,7 @@ export interface Dream {
   id: string;
   created_at: string;
   message_id: string;
-  image: Uint8Array;
+  image: string;
   dream_summary: string | null;
   dream_category: string | null;
   return_message_id: string | null;
