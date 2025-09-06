@@ -120,7 +120,7 @@ const Calendar: React.FC<CalendarProps> = ({
     3: getRandomPainting(3),
     4: getRandomPainting(4),
     5: getRandomPainting(5),
-    6: getRandomPainting(6),
+    6: "/images/JPEG%20image-41A9-AF7B-D0-0%202.jpeg",
     7: getRandomPainting(7),
     8: getRandomPainting(8),
     9: getRandomPainting(9),
@@ -490,13 +490,19 @@ const Calendar: React.FC<CalendarProps> = ({
           >
             <DreamCard
               date={`${selectedDay.date.toString().padStart(2, "0")} ${monthNames[currentMonth]}`}
-              title="Dream Entry"
+              title={
+                currentMonth === 8 && currentYear === 2025 && selectedDay.date === 6
+                  ? "Dog-walk"
+                  : "Dream Entry"
+              }
               description={
                 selectedDay.isFuture 
                   ? "this dream is not yet dreamt" 
-                  : daysWithDreams[selectedDay.date]?.dream_summary || 
-                    daysWithDreams[selectedDay.date]?.dream_category || 
-                    "A beautiful moment captured in time, filled with wonder and inspiration."
+                  : currentMonth === 8 && currentYear === 2025 && selectedDay.date === 6
+                    ? "you walked your dog through a flower valley on a sunny day"
+                    : daysWithDreams[selectedDay.date]?.dream_summary || 
+                      daysWithDreams[selectedDay.date]?.dream_category || 
+                      "A beautiful moment captured in time, filled with wonder and inspiration."
               }
               backgroundImage={selectedDay.imageUrl || "/images/dream-background.png"}
               disableEntranceAnimations
@@ -560,13 +566,19 @@ const Calendar: React.FC<CalendarProps> = ({
                 >
                   <DreamCard
                     date={`${selectedDay.date.toString().padStart(2, "0")} ${monthNames[currentMonth]}`}
-                    title="Dream Entry"
+                    title={
+                      currentMonth === 8 && currentYear === 2025 && selectedDay.date === 6
+                        ? "Dog-walk"
+                        : "Dream Entry"
+                    }
                     description={
                       selectedDay.isFuture 
                         ? "this dream is not yet dreamt" 
-                        : daysWithDreams[selectedDay.date]?.dream_summary || 
-                          daysWithDreams[selectedDay.date]?.dream_category || 
-                          "A beautiful moment captured in time, filled with wonder and inspiration."
+                        : currentMonth === 8 && currentYear === 2025 && selectedDay.date === 6
+                          ? "you walked your dog through a flower valley on a sunny day"
+                          : daysWithDreams[selectedDay.date]?.dream_summary || 
+                            daysWithDreams[selectedDay.date]?.dream_category || 
+                            "A beautiful moment captured in time, filled with wonder and inspiration."
                     }
                     backgroundImage={selectedDay.imageUrl || "/images/dream-background.png"}
                     disableEntranceAnimations
