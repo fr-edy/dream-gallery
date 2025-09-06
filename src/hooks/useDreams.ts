@@ -18,8 +18,8 @@ export function useDreams() {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
       
-      const data = await res.json();
-      setDreams(data);
+      const response = await res.json();
+      setDreams(response.data || []);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch dreams'));
     } finally {
